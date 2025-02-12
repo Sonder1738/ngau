@@ -1,8 +1,7 @@
 <html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.min.js "></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script src="/dist/tesseract.min.js"></script>
   <style>
     .column {
   float: left;
@@ -35,10 +34,7 @@
     </div>
   </div>
 
-  <script type="module">
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.worker.js";
-      
+  <script>
     const recognize = async ({ target: { files } }) => {
       document.getElementById("imgInput").src = URL.createObjectURL(files[0]);
       const worker = await Tesseract.createWorker("eng", 1, {
