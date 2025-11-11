@@ -9,5 +9,5 @@ jobs:
     - name: Validate Commit Message
       uses: gsactions/commit-message-checker@v2
       with:
-        regex: '[j|J]-[a-zA-Z]{2,6}-\d{4}\s(\S+\s){2,}\S+'
+        pattern: '[j|J]-[a-zA-Z]{2,6}-\d{4}\s(\S+\s){2,}\S+'
         error: 'Commit message does not follow the required format: J-{ticket} Short description'
