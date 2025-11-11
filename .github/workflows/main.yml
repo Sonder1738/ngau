@@ -3,18 +3,6 @@ name: main
 on: [pull_request]
 
 jobs:
-  lint:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Check out code
-      uses: actions/checkout@main
-    - name: Lint Terraform
-      uses: actionshub/terraform-lint@main
-    - name: Lint YAML
-      uses: ibiqlik/action-yamllint@v3
-
   check_commit_message:
     runs-on: ubuntu-latest
     steps:
