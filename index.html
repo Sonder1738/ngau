@@ -196,16 +196,6 @@
 
 <script>
 
-    // ==========================================
-    // OPENROUTER API KEY
-    // ==========================================
-
-    const OPENROUTER_API_KEY = "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";
-
-    // ==========================================
-    // ELEMENTS
-    // ==========================================
-
     const imageInput = document.getElementById("imageInput");
     const dropZone = document.getElementById("dropZone");
     const preview = document.getElementById("preview");
@@ -215,10 +205,7 @@
 
     let selectedFile = null;
 
-    // ==========================================
-    // IMAGE SELECTION
-    // ==========================================
-
+    // Image selection
     dropZone.addEventListener("click", () => {
         imageInput.click();
     });
@@ -229,10 +216,7 @@
         }
     });
 
-    // ==========================================
-    // DRAG AND DROP
-    // ==========================================
-
+    // Drag and drop
     dropZone.addEventListener("dragover", (e) => {
         e.preventDefault();
         dropZone.style.borderColor = "#818cf8";
@@ -244,16 +228,11 @@
 
     dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = "#586783";
 
         const file = e.dataTransfer.files[0];
 
         if (file) loadImage(file);
     });
-
-    // ==========================================
-    // LOAD IMAGE
-    // ==========================================
 
     function loadImage(file) {
 
@@ -279,12 +258,9 @@
         const reader = new FileReader();
 
         reader.onload = (e) => {
-
             preview.src = e.target.result;
             preview.style.display = "block";
-
             analyzeBtn.disabled = false;
-
             result.style.display = "none";
             status.textContent = "";
 
@@ -298,10 +274,7 @@
         reader.readAsDataURL(file);
     }
 
-    // ==========================================
-    // CONVERT IMAGE TO BASE64
-    // ==========================================
-
+    // Convert image to Base64 data URL
     function fileToBase64(file) {
 
         return new Promise((resolve, reject) => {
@@ -317,22 +290,12 @@
 
     }
 
-    // ==========================================
-    // ANALYZE IMAGE USING OPENROUTER
-    // ==========================================
-
+    // Analyze image using Netlify Function
     async function analyzeImage() {
-
-        const apiKey = OPENROUTER_API_KEY;
 
         const prompt = document.getElementById("prompt").value.trim();
 
         const detailed = document.getElementById("detailed").checked;
-
-        if (!apiKey || apiKey.includes("PASTE-YOUR-API-KEY-HERE")) {
-            alert("Please add your OpenRouter API key inside the HTML.");
-            return;
-        }
 
         if (!selectedFile) {
             alert("Please upload an image first.");
@@ -358,42 +321,18 @@
                 ? prompt + "\n\nProvide a detailed, well-structured answer. Include the likely identity of the subject, visual evidence, relevant context, and any uncertainty. Do not invent details that cannot be determined from the image."
                 : prompt;
 
-            status.textContent = "🤖 Analyzing your image...";
-
             const response = await fetch(
-                "https://openrouter.ai/api/v1/chat/completions",
+                "/.netlify/functions/analyze",
                 {
                     method: "POST",
 
                     headers: {
-                        "Authorization": "Bearer " + apiKey,
                         "Content-Type": "application/json"
                     },
 
                     body: JSON.stringify({
-
-                        model: "openrouter/free",
-
-                        messages: [
-                            {
-                                role: "user",
-
-                                content: [
-                                    {
-                                        type: "text",
-                                        text: finalPrompt
-                                    },
-                                    {
-                                        type: "image_url",
-                                        image_url: {
-                                            url: base64Image
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-
-                        max_tokens: 1500
+                        image: base64Image,
+                        prompt: finalPrompt
                     })
                 }
             );
@@ -403,7 +342,8 @@
             if (!response.ok) {
                 throw new Error(
                     data.error?.message ||
-                    "OpenRouter API request failed: " + response.status
+                    data.error ||
+                    "Image analysis failed: " + response.status
                 );
             }
 
@@ -415,7 +355,6 @@
             }
 
             result.textContent = answer;
-
             result.style.display = "block";
 
             status.textContent = "✅ Image analysis completed!";
@@ -425,7 +364,6 @@
             status.textContent = "❌ Something went wrong.";
 
             result.textContent = error.message;
-
             result.style.display = "block";
 
         } finally {
