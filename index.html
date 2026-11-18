@@ -7,9 +7,7 @@
     <title>AI Image Identifier</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -29,10 +27,7 @@
             border: 1px solid #30394d;
         }
 
-        h1 {
-            margin-top: 0;
-            text-align: center;
-        }
+        h1 { margin-top: 0; text-align: center; }
 
         .subtitle {
             text-align: center;
@@ -46,7 +41,7 @@
             font-weight: bold;
         }
 
-        input, select, textarea {
+        input, textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -54,10 +49,6 @@
             background: #111827;
             color: white;
             font-size: 14px;
-        }
-
-        input[type="file"] {
-            cursor: pointer;
         }
 
         .drop-zone {
@@ -98,9 +89,7 @@
             margin-top: 20px;
         }
 
-        button:hover {
-            background: #4f46e5;
-        }
+        button:hover { background: #4f46e5; }
 
         button:disabled {
             opacity: 0.5;
@@ -140,10 +129,19 @@
             font-size: 13px;
         }
 
-        .checkbox-row input {
-            width: auto;
+        .checkbox-row input { width: auto; }
+
+        .free-badge {
+            display: inline-block;
+            background: #064e3b;
+            color: #6ee7b7;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin: 0 auto 15px;
         }
 
+        .center { text-align: center; }
     </style>
 </head>
 
@@ -157,6 +155,10 @@
         Upload a picture and let AI tell you what it sees.
     </p>
 
+    <div class="center">
+        <span class="free-badge">⚡ OpenRouter Free Models</span>
+    </div>
+
     <label for="apiKey">OpenRouter API Key</label>
     <input
         type="password"
@@ -166,24 +168,8 @@
     >
 
     <div class="hint">
-        Your key is used only for API requests from this browser.
+        Your key is used for API requests from this browser.
     </div>
-
-    <label for="model">AI Model</label>
-    <select id="model">
-        <option value="google/gemini-2.5-flash">
-            Google Gemini 2.5 Flash
-        </option>
-        <option value="openai/gpt-4o-mini">
-            OpenAI GPT-4o Mini
-        </option>
-        <option value="anthropic/claude-sonnet-4">
-            Claude Sonnet 4
-        </option>
-        <option value="google/gemini-2.5-pro">
-            Google Gemini 2.5 Pro
-        </option>
-    </select>
 
     <label>Upload Picture</label>
 
@@ -200,6 +186,7 @@
     <img id="preview" alt="Image preview">
 
     <label for="prompt">What would you like to know?</label>
+
     <textarea id="prompt" rows="3">Identify this picture. Describe exactly what is shown, including the main objects, people, animals, environment, and any interesting details.</textarea>
 
     <div class="checkbox-row">
@@ -255,9 +242,7 @@
 
         const file = e.dataTransfer.files[0];
 
-        if (file) {
-            loadImage(file);
-        }
+        if (file) loadImage(file);
     });
 
     function loadImage(file) {
@@ -299,7 +284,7 @@
         reader.readAsDataURL(file);
     }
 
-    // Convert image to a data URL
+    // Convert image to Base64 data URL
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -311,11 +296,10 @@
         });
     }
 
-    // Analyze image with OpenRouter
+    // Analyze image using OpenRouter FREE router
     async function analyzeImage() {
 
         const apiKey = document.getElementById("apiKey").value.trim();
-        const model = document.getElementById("model").value;
         const prompt = document.getElementById("prompt").value.trim();
         const detailed = document.getElementById("detailed").checked;
 
@@ -335,7 +319,7 @@
         }
 
         analyzeBtn.disabled = true;
-        status.textContent = "⏳ AI is examining your picture...";
+        status.textContent = "⏳ Finding a free vision model...";
         result.style.display = "none";
 
         try {
@@ -357,7 +341,9 @@
                     },
 
                     body: JSON.stringify({
-                        model: model,
+
+                        // Always use OpenRouter's free model router
+                        model: "openrouter/free",
 
                         messages: [
                             {
