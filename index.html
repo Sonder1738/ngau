@@ -337,7 +337,18 @@
                 }
             );
 
-            const data = await response.json();
+            const responseText = await response.text();
+
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch {
+                throw new Error(
+                    "Netlify returned an invalid response: " +
+                    responseText.substring(0, 300)
+                );
+            }
 
             if (!response.ok) {
                 throw new Error(
