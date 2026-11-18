@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +40,7 @@
             font-weight: bold;
         }
 
-        textarea {
+        input, textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -159,6 +158,18 @@
         <span class="free-badge">⚡ OpenRouter Free Models</span>
     </div>
 
+    <label for="apiKey">OpenRouter API Key</label>
+    <input
+        type="password"
+        id="apiKey"
+        placeholder="sk-or-v1-..."
+        autocomplete="off"
+    >
+
+    <div class="hint">
+        Your key is used for API requests from this browser.
+    </div>
+
     <label>Upload Picture</label>
 
     <div class="drop-zone" id="dropZone">
@@ -170,8 +181,6 @@
             hidden
         >
     </div>
-
-    <p class="hint">JPG, PNG, WEBP or GIF. Maximum 4 MB.</p>
 
     <img id="preview" alt="Image preview">
 
@@ -186,7 +195,7 @@
         </label>
     </div>
 
-    <button id="analyzeBtn" disabled>
+    <button id="analyzeBtn" disabled onclick="analyzeImage()">
         🔍 Identify Image
     </button>
 
@@ -206,6 +215,7 @@
 
     let selectedFile = null;
 
+    // Image selection
     dropZone.addEventListener("click", () => {
         imageInput.click();
     });
@@ -216,6 +226,7 @@
         }
     });
 
+    // Drag and drop
     dropZone.addEventListener("dragover", (e) => {
         e.preventDefault();
         dropZone.style.borderColor = "#818cf8";
@@ -227,7 +238,6 @@
 
     dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
-        dropZone.style.borderColor = "#586783";
 
         const file = e.dataTransfer.files[0];
 
@@ -247,8 +257,8 @@
             return;
         }
 
-        if (file.size > 4 * 1024 * 1024) {
-            alert("Image must be smaller than 4 MB.");
+        if (file.size > 15 * 1024 * 1024) {
+            alert("Image must be smaller than 15 MB.");
             return;
         }
 
@@ -273,27 +283,34 @@
         reader.readAsDataURL(file);
     }
 
+    // Convert image to Base64 data URL
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
             reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(
-                new Error("Could not read image.")
-            );
+            reader.onerror = reject;
 
             reader.readAsDataURL(file);
         });
     }
 
+    // Analyze image using OpenRouter FREE router
     async function analyzeImage() {
+
+        const apiKey = document.getElementById("apiKey").value.trim();
+        const prompt = document.getElementById("prompt").value.trim();
+        const detailed = document.getElementById("detailed").checked;
+
+        if (!apiKey) {
+            alert("Please enter your OpenRouter API key.");
+            return;
+        }
+
         if (!selectedFile) {
             alert("Please upload an image first.");
             return;
         }
-
-        const prompt = document.getElementById("prompt").value.trim();
-        const detailed = document.getElementById("detailed").checked;
 
         if (!prompt) {
             alert("Please enter a question or prompt.");
@@ -301,28 +318,52 @@
         }
 
         analyzeBtn.disabled = true;
-        status.textContent = "⏳ Preparing your image...";
+        status.textContent = "⏳ Finding a free vision model...";
         result.style.display = "none";
 
         try {
+
             const base64Image = await fileToBase64(selectedFile);
 
             const finalPrompt = detailed
                 ? prompt + "\n\nProvide a detailed, well-structured answer. Include the likely identity of the subject, visual evidence, relevant context, and any uncertainty. Do not invent details that cannot be determined from the image."
                 : prompt;
 
-            status.textContent = "🤖 AI is analyzing your image...";
-
             const response = await fetch(
-                "/.netlify/functions/analyze",
+                "https://openrouter.ai/api/v1/chat/completions",
                 {
                     method: "POST",
+
                     headers: {
+                        "Authorization": "Bearer " + apiKey,
                         "Content-Type": "application/json"
                     },
+
                     body: JSON.stringify({
-                        image: base64Image,
-                        prompt: finalPrompt
+
+                        // Always use OpenRouter's free model router
+                        model: "openrouter/free",
+
+                        messages: [
+                            {
+                                role: "user",
+
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: finalPrompt
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: base64Image
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+
+                        max_tokens: 1500
                     })
                 }
             );
@@ -331,31 +372,37 @@
 
             if (!response.ok) {
                 throw new Error(
-                    data.error || "Image analysis failed."
+                    data.error?.message ||
+                    "OpenRouter API request failed: " + response.status
                 );
             }
 
-            if (!data.answer) {
+            const answer =
+                data.choices?.[0]?.message?.content;
+
+            if (!answer) {
                 throw new Error("The AI returned an empty response.");
             }
 
-            result.textContent = data.answer;
+            result.textContent = answer;
             result.style.display = "block";
 
             status.textContent = "✅ Image analysis completed!";
 
         } catch (error) {
+
             status.textContent = "❌ Something went wrong.";
 
             result.textContent = error.message;
             result.style.display = "block";
 
         } finally {
-            analyzeBtn.disabled = !selectedFile;
+
+            analyzeBtn.disabled = false;
+
         }
     }
 
-    analyzeBtn.addEventListener("click", analyzeImage);
 </script>
 
 </body>
