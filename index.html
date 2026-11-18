@@ -337,52 +337,33 @@
                 }
             );
 
+            // Read Netlify response
             const responseText = await response.text();
 
-console.log("Netlify status:", response.status);
-console.log("Netlify response:", responseText);
+            console.log("Netlify status:", response.status);
+            console.log("Netlify response:", responseText);
 
-if (!responseText) {
-    throw new Error(
-        "Netlify returned an empty response. HTTP status: " +
-        response.status
-    );
-}
-
-let data;
-
-try {
-    data = JSON.parse(responseText);
-} catch (error) {
-    throw new Error(
-        "Invalid Netlify response. HTTP " +
-        response.status + ": " +
-        responseText.substring(0, 500)
-    );
-}
-
-if (!response.ok) {
-    throw new Error(
-        data.error || "Request failed: " + response.status
-    );
-}
-
-const answer = data.choices?.[0]?.message?.content;
-
-if (!answer) {
-    throw new Error("The AI returned an empty response.");
-}
-            let data;
-            
-            try {
-                data = JSON.parse(responseText);
-            } catch {
+            if (!responseText) {
                 throw new Error(
-                    "Netlify returned an invalid response: " +
-                    responseText.substring(0, 300)
+                    "Netlify returned an empty response. HTTP status: " +
+                    response.status
                 );
             }
 
+            // Parse JSON response
+            let data;
+
+            try {
+                data = JSON.parse(responseText);
+            } catch (error) {
+                throw new Error(
+                    "Invalid Netlify response. HTTP " +
+                    response.status + ": " +
+                    responseText.substring(0, 500)
+                );
+            }
+
+            // Handle errors
             if (!response.ok) {
                 throw new Error(
                     data.error?.message ||
@@ -391,6 +372,7 @@ if (!answer) {
                 );
             }
 
+            // Extract AI response
             const answer =
                 data.choices?.[0]?.message?.content;
 
@@ -404,6 +386,8 @@ if (!answer) {
             status.textContent = "✅ Image analysis completed!";
 
         } catch (error) {
+
+            console.error("Analysis error:", error);
 
             status.textContent = "❌ Something went wrong.";
 
