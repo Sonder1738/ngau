@@ -1,341 +1,424 @@
+
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>pdf2text-ocr</title>
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.min.js "></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-    <script type="module">
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/build/pdf.worker.js";
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Identifier</title>
 
-      const languages = [
-        { name: "English", code: "eng" },
-        { name: "Portuguese", code: "por" },
-        { name: "Afrikaans", code: "afr" },
-        { name: "Albanian", code: "sqi" },
-        { name: "Amharic", code: "amh" },
-        { name: "Arabic", code: "ara" },
-        { name: "Assamese", code: "asm" },
-        { name: "Azerbaijani", code: "aze" },
-        { name: "Azerbaijani - Cyrillic", code: "aze_cyrl" },
-        { name: "Basque", code: "eus" },
-        { name: "Belarusian", code: "bel" },
-        { name: "Bengali", code: "ben" },
-        { name: "Bosnian", code: "bos" },
-        { name: "Bulgarian", code: "bul" },
-        { name: "Burmese", code: "mya" },
-        { name: "Catalan; Valencian", code: "cat" },
-        { name: "Cebuano", code: "ceb" },
-        { name: "Central Khmer", code: "khm" },
-        { name: "Cherokee", code: "chr" },
-        { name: "Chinese - Simplified", code: "chi_sim" },
-        { name: "Chinese - Traditional", code: "chi_tra" },
-        { name: "Croatian", code: "hrv" },
-        { name: "Czech", code: "ces" },
-        { name: "Danish", code: "dan" },
-        { name: "Dutch; Flemish", code: "nld" },
-        { name: "Dzongkha", code: "dzo" },
-        { name: "English, Middle (1100-1500)", code: "enm" },
-        { name: "Esperanto", code: "epo" },
-        { name: "Estonian", code: "est" },
-        { name: "Finnish", code: "fin" },
-        { name: "French", code: "fra" },
-        { name: "French, Middle (ca. 1400-1600)", code: "frm" },
-        { name: "Galician", code: "glg" },
-        { name: "Georgian", code: "kat" },
-        { name: "German", code: "deu" },
-        { name: "German Fraktur", code: "frk" },
-        { name: "Greek, Modern (1453-)", code: "ell" },
-        { name: "Greek, Ancient (-1453)", code: "grc" },
-        { name: "Gujarati", code: "guj" },
-        { name: "Haitian; Haitian Creole", code: "hat" },
-        { name: "Hebrew", code: "heb" },
-        { name: "Hindi", code: "hin" },
-        { name: "Hungarian", code: "hun" },
-        { name: "Icelandic", code: "isl" },
-        { name: "Indonesian", code: "ind" },
-        { name: "Inuktitut", code: "iku" },
-        { name: "Irish", code: "gle" },
-        { name: "Italian", code: "ita" },
-        { name: "Japanese", code: "jpn" },
-        { name: "Javanese", code: "jav" },
-        { name: "Kannada", code: "kan" },
-        { name: "Kazakh", code: "kaz" },
-        { name: "Kirghiz; Kyrgyz", code: "kir" },
-        { name: "Korean", code: "kor" },
-        { name: "Kurdish", code: "kur" },
-        { name: "Lao", code: "lao" },
-        { name: "Latin", code: "lat" },
-        { name: "Latvian", code: "lav" },
-        { name: "Lithuanian", code: "lit" },
-        { name: "Macedonian", code: "mkd" },
-        { name: "Malay", code: "msa" },
-        { name: "Malayalam", code: "mal" },
-        { name: "Maltese", code: "mlt" },
-        { name: "Marathi", code: "mar" },
-        { name: "Nepali", code: "nep" },
-        { name: "Norwegian", code: "nor" },
-        { name: "Oriya", code: "ori" },
-        { name: "Panjabi; Punjabi", code: "pan" },
-        { name: "Persian", code: "fas" },
-        { name: "Polish", code: "pol" },
-        { name: "Pushto; Pashto", code: "pus" },
-        { name: "Romanian; Moldavian; Moldovan", code: "ron" },
-        { name: "Russian", code: "rus" },
-        { name: "Sanskrit", code: "san" },
-        { name: "Serbian", code: "srp" },
-        { name: "Serbian - Latin", code: "srp_latn" },
-        { name: "Sinhala; Sinhalese", code: "sin" },
-        { name: "Slovak", code: "slk" },
-        { name: "Slovenian", code: "slv" },
-        { name: "Spanish; Castilian", code: "spa" },
-        { name: "Swahili", code: "swa" },
-        { name: "Swedish", code: "swe" },
-        { name: "Syriac", code: "syr" },
-        { name: "Tagalog", code: "tgl" },
-        { name: "Tajik", code: "tgk" },
-        { name: "Tamil", code: "tam" },
-        { name: "Telugu", code: "tel" },
-        { name: "Thai", code: "tha" },
-        { name: "Tibetan", code: "bod" },
-        { name: "Tigrinya", code: "tir" },
-        { name: "Turkish", code: "tur" },
-        { name: "Uighur; Uyghur", code: "uig" },
-        { name: "Ukrainian", code: "ukr" },
-        { name: "Urdu", code: "urd" },
-        { name: "Uzbek", code: "uzb" },
-        { name: "Uzbek - Cyrillic", code: "uzb_cyrl" },
-        { name: "Vietnamese", code: "vie" },
-        { name: "Welsh", code: "cym" },
-        { name: "Yiddish", code: "yid" },
-      ];
-
-      let language = localStorage.getItem("language") ?? "eng";
-
-      const readFile = (file) => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.addEventListener("loadend", (event) =>
-            resolve(new Uint8Array(event.target.result))
-          );
-          reader.readAsArrayBuffer(file);
-        });
-      };
-
-      const convertToImage = async (pdf) => {
-        const container = document.getElementById("container");
-        const images = [];
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-          const page = await pdf.getPage(pageNumber);
-          const viewport = page.getViewport({ scale: 1.5 });
-          const canvas = document.createElement("canvas");
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          container.appendChild(canvas);
-          await page.render({
-            canvasContext: canvas.getContext("2d"),
-            viewport: viewport,
-          }).promise;
-          images.push(canvas.toDataURL("image/png"));
-        }
-        return images;
-      };
-
-      const convertToText = async (images) => {
-        const worker = await Tesseract.createWorker();
-        await worker.loadLanguage(language);
-        await worker.initialize(language);
-
-        const container = document.getElementById("container");
-        for (const image of images) {
-          const {
-            data: { text },
-          } = await worker.recognize(image);
-          const section = document.createElement("section");
-          const pre = document.createElement("pre");
-          pre.appendChild(document.createTextNode(text));
-          section.appendChild(pre);
-          container.appendChild(section);
+    <style>
+        * {
+            box-sizing: border-box;
         }
 
-        await worker.terminate();
-      };
-
-      const loadFile = async (file) =>
-        pdfjsLib.getDocument({ data: file }).promise;
-
-      const convertFile = async (file) => {
-        showLoading();
-        const pdf = await loadFile(file);
-        // const images = await convertToImage(pdf);
-        await convertToText(pdf);
-        hideLoading();
-      };
-
-      const showLoading = () =>
-        (document.getElementById("loading").style.display = "block");
-
-      const hideLoading = () =>
-        (document.getElementById("loading").style.display = "none");
-
-      const showError = (error) =>
-        document
-          .getElementById("error")
-          .appendChild(document.createTextNode(`Error: ${error.message}`));
-
-      const clearResults = () => {
-        ["container", "loading", "error"].forEach((id) => {
-          let element = document.getElementById(id);
-          element.remove();
-          element = document.createElement("div");
-          element.id = id;
-          if (id === "loading") {
-            element.appendChild(document.createTextNode("Loading..."));
-          }
-          document.body.appendChild(element);
-        });
-      };
-
-      const languageSelect = document.getElementById("language-select");
-      languages.forEach((lang) => {
-        const option = document.createElement("option");
-        option.appendChild(document.createTextNode(lang.name));
-        option.value = lang.code;
-        languageSelect.appendChild(option);
-      });
-
-      languageSelect.value = language;
-      languageSelect.addEventListener("change", (event) => {
-        language = event.target.value;
-        localStorage.setItem("language", language);
-      });
-
-      const fileInput = document.getElementById("file-input");
-      fileInput.addEventListener("change", async () => {
-        clearResults();
-        try {
-          await convertFile(await readFile(fileInput.files[0]));
-        } catch (error) {
-          hideLoading();
-          showError(error);
+        body {
+            margin: 0;
+            padding: 30px 16px;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #10131c;
+            color: #f1f5f9;
         }
-      });
-    </script>
-  </head>
 
-  <body>
-    <h1>pdf2text-ocr</h1>
-    <p>
-      <a href="https://racosa.github.io/pdf2text-ocr/">pdf2text-ocr</a> is a
-      simple tool for converting PDF to text using OCR. Files are converted
-      locally in the browser and are never uploaded to external servers.
+        .container {
+            max-width: 720px;
+            margin: auto;
+            background: #1b2030;
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid #30394d;
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #3b465c;
+            background: #111827;
+            color: white;
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            cursor: pointer;
+        }
+
+        .drop-zone {
+            border: 2px dashed #586783;
+            padding: 30px 15px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #aab6ca;
+            margin-top: 10px;
+        }
+
+        .drop-zone:hover {
+            border-color: #818cf8;
+            background: #242c40;
+        }
+
+        #preview {
+            display: none;
+            width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            margin-top: 20px;
+            border-radius: 10px;
+            background: #111827;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 9px;
+            background: #6366f1;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #4f46e5;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #result {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        #status {
+            text-align: center;
+            color: #a5b4fc;
+            margin-top: 15px;
+        }
+
+        .hint {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        .checkbox-row input {
+            width: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🔍 AI Image Identifier</h1>
+
+    <p class="subtitle">
+        Upload a picture and let AI tell you what it sees.
     </p>
-    <p>
-      It can be very useful if you are getting gibberish when copying and pasting
-      text from PDF (<a
-        href="https://superuser.com/questions/137824/pdf-has-garbled-text-when-copy-pasting"
-        >example</a
-      >), specially if you don't want to or cannot use a cloud-based solution.
-    </p>
-    <p>
-      Free and open source:
-      <a href="https://github.com/racosa/pdf2text-ocr">Github</a>
-    </p>
-    <div id="input-container">
-      <p>Select the language and a file:</p>
-      <div>
-        <select name="languages" id="language-select"></select>
-      </div>
-      <div>
-        <label id="file-input-label" for="file-input">Select a file</label
-        ><br />
-        <input type="file" id="file-input" name="file-input" multiple />
-      </div>
+
+    <label for="apiKey">OpenRouter API Key</label>
+    <input
+        type="password"
+        id="apiKey"
+        placeholder="sk-or-v1-..."
+        autocomplete="off"
+    >
+
+    <div class="hint">
+        Your key is used only for API requests from this browser.
     </div>
-    <div id="container"></div>
-    <div id="loading">Loading...</div>
-    <div id="error"></div>
-  </body>
 
-  <style>
-    body {
-      color: #212121;
-      font-family: Arial, sans-serif;
-      scroll-behavior: smooth;
-      font-size: 1.15rem;
-      line-height: 1.5;
-      max-width: 850px;
-      margin: auto;
-      padding-top: 1rem;
+    <label for="model">AI Model</label>
+    <select id="model">
+        <option value="google/gemini-2.5-flash">
+            Google Gemini 2.5 Flash
+        </option>
+        <option value="openai/gpt-4o-mini">
+            OpenAI GPT-4o Mini
+        </option>
+        <option value="anthropic/claude-sonnet-4">
+            Claude Sonnet 4
+        </option>
+        <option value="google/gemini-2.5-pro">
+            Google Gemini 2.5 Pro
+        </option>
+    </select>
+
+    <label>Upload Picture</label>
+
+    <div class="drop-zone" id="dropZone">
+        📁 Click here or drag and drop an image
+        <input
+            type="file"
+            id="imageInput"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            hidden
+        >
+    </div>
+
+    <img id="preview" alt="Image preview">
+
+    <label for="prompt">What would you like to know?</label>
+    <textarea id="prompt" rows="3">Identify this picture. Describe exactly what is shown, including the main objects, people, animals, environment, and any interesting details.</textarea>
+
+    <div class="checkbox-row">
+        <input type="checkbox" id="detailed" checked>
+        <label for="detailed" style="margin:0;font-weight:normal">
+            Give me a detailed analysis
+        </label>
+    </div>
+
+    <button id="analyzeBtn" disabled onclick="analyzeImage()">
+        🔍 Identify Image
+    </button>
+
+    <div id="status"></div>
+
+    <div id="result"></div>
+
+</div>
+
+<script>
+    const imageInput = document.getElementById("imageInput");
+    const dropZone = document.getElementById("dropZone");
+    const preview = document.getElementById("preview");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    let selectedFile = null;
+
+    // Image selection
+    dropZone.addEventListener("click", () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener("change", (e) => {
+        if (e.target.files.length) {
+            loadImage(e.target.files[0]);
+        }
+    });
+
+    // Drag and drop
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = "#818cf8";
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+        dropZone.style.borderColor = "#586783";
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+
+        const file = e.dataTransfer.files[0];
+
+        if (file) {
+            loadImage(file);
+        }
+    });
+
+    function loadImage(file) {
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("Please upload a JPG, PNG, WEBP or GIF image.");
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            alert("Image must be smaller than 15 MB.");
+            return;
+        }
+
+        selectedFile = file;
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+            analyzeBtn.disabled = false;
+            result.style.display = "none";
+            status.textContent = "";
+
+            dropZone.innerHTML =
+                "✅ " + file.name +
+                '<br><small>Click to change image</small>';
+
+            dropZone.appendChild(imageInput);
+        };
+
+        reader.readAsDataURL(file);
     }
 
-    a {
-      text-decoration: none;
+    // Convert image to a data URL
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+        });
     }
 
-    a:hover {
-      text-decoration: underline;
+    // Analyze image with OpenRouter
+    async function analyzeImage() {
+
+        const apiKey = document.getElementById("apiKey").value.trim();
+        const model = document.getElementById("model").value;
+        const prompt = document.getElementById("prompt").value.trim();
+        const detailed = document.getElementById("detailed").checked;
+
+        if (!apiKey) {
+            alert("Please enter your OpenRouter API key.");
+            return;
+        }
+
+        if (!selectedFile) {
+            alert("Please upload an image first.");
+            return;
+        }
+
+        if (!prompt) {
+            alert("Please enter a question or prompt.");
+            return;
+        }
+
+        analyzeBtn.disabled = true;
+        status.textContent = "⏳ AI is examining your picture...";
+        result.style.display = "none";
+
+        try {
+
+            const base64Image = await fileToBase64(selectedFile);
+
+            const finalPrompt = detailed
+                ? prompt + "\n\nProvide a detailed, well-structured answer. Include the likely identity of the subject, visual evidence, relevant context, and any uncertainty. Do not invent details that cannot be determined from the image."
+                : prompt;
+
+            const response = await fetch(
+                "https://openrouter.ai/api/v1/chat/completions",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Authorization": "Bearer " + apiKey,
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        model: model,
+
+                        messages: [
+                            {
+                                role: "user",
+
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: finalPrompt
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: base64Image
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+
+                        max_tokens: 1500
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error?.message ||
+                    "OpenRouter API request failed: " + response.status
+                );
+            }
+
+            const answer =
+                data.choices?.[0]?.message?.content;
+
+            if (!answer) {
+                throw new Error("The AI returned an empty response.");
+            }
+
+            result.textContent = answer;
+            result.style.display = "block";
+
+            status.textContent = "✅ Image analysis completed!";
+
+        } catch (error) {
+
+            status.textContent = "❌ Something went wrong.";
+
+            result.textContent = error.message;
+            result.style.display = "block";
+
+        } finally {
+
+            analyzeBtn.disabled = false;
+
+        }
     }
 
-    select {
-      font-size: 1.15rem;
-      font-family: inherit;
-      line-height: inherit;
-      padding-left: 1rem;
-    }
+</script>
 
-    input[type="file"] {
-      display: none;
-    }
-
-    select,
-    #file-input-label {
-      padding: 0.5em;
-      border: thin solid grey;
-      border-radius: 3px;
-      cursor: pointer;
-      background-color: #f6f6fb;
-    }
-
-    #input-container {
-      margin-top: 2rem;
-    }
-
-    #input-container div {
-      display: inline-block;
-      margin-right: 1rem;
-    }
-
-    #loading,
-    #error {
-      margin-top: 2rem;
-      margin-bottom: 3rem;
-    }
-
-    #loading {
-      display: none;
-    }
-
-    section {
-      border-top: 1px solid #898ea4;
-      border-bottom: 1px solid #898ea4;
-      padding: 2rem 1rem;
-      margin: 3rem 0;
-    }
-
-    section + section,
-    section:first-child {
-      border-top: 0;
-      padding-top: 0;
-    }
-
-    pre {
-      font-family: Arial, sans-serif;
-      margin: 0;
-    }
-
-    canvas {
-      display: none;
-    }
-  </style>
+</body>
 </html>
